@@ -1,0 +1,27 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/authdb
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+jwt:
+  secret: hKfYbV1L1LwzFX2Yw8hEHyTj3E4xjV5SyJ6eR3Jg+oE=
+  expiration: 3600000
+  refreshExpiration: 1209600000  # 14 ???? ??? refresh token
