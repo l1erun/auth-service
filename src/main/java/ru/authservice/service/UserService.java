@@ -1,8 +1,12 @@
 package ru.authservice.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import ru.authservice.dto.UserRequest;
 import ru.authservice.entity.Role;
 import ru.authservice.entity.User;
 import ru.authservice.repository.RoleRepository;
@@ -24,11 +28,21 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private WebClient webClient;
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+
+
     /**
      * Регистрирует нового пользователя.
      */
-    public User registerUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public User registerUser(UserRequest userRequest) {
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setUsername(userRequest.getUsername());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> {
                     Role newRole = new Role();
@@ -36,7 +50,10 @@ public class UserService {
                     return roleRepository.save(newRole); // Сохранить новую роль в базу
                 });
         user.setRoles(Collections.singleton(userRole));
-        return userRepository.save(user);
+        createProfileInProfileService(user);
+        User newUser = userRepository.save(user);
+        logger.info(newUser.toString());
+        return newUser;
     }
 
     /**
@@ -58,5 +75,18 @@ public class UserService {
      */
     public Optional<User> findById(UUID userId) {
         return userRepository.findById(userId);
+    }
+
+    private void createProfileInProfileService(User user) {
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("username", user.getUsername());
+//        profileData.put("email", user.getEmail());
+
+        webClient.post()
+                .uri("http://localhost:8082/players/" + user.getId()) // URL микросервиса профиля
+                .bodyValue(profileData)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block(); // Блокирующий вызов
     }
 }

@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 public class User {
     @Id
-    @GeneratedValue
+//    @GeneratedValue
     private UUID id; // Уникальный идентификатор пользователя
 
     @NotBlank

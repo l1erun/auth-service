@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.authservice.dto.JwtResponse;
+import ru.authservice.dto.UserRequest;
 import ru.authservice.dto.UserResponse;
 import ru.authservice.entity.CustomUserDetails;
 import ru.authservice.entity.User;
@@ -20,6 +21,7 @@ import ru.authservice.service.JwtService;
 import ru.authservice.service.UserService;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,7 +43,8 @@ public class AuthController {
     private JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest user) {
+        System.out.println(user);
         if (userService.findByUsername(user.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username is already taken");
         }
@@ -49,7 +52,6 @@ public class AuthController {
         if (userService.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email is already in use");
         }
-
         userService.registerUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
@@ -70,11 +72,7 @@ public class AuthController {
             String refreshToken = jwtService.generateRefreshToken(user); // Генерация refresh token
 
             UserResponse userResponse = new UserResponse(user);
-            System.out.println(user);
-            System.out.println(userResponse);
-            System.out.println(jwt);
             JwtResponse jwtResponse = new JwtResponse(jwt, refreshToken, userResponse);
-            System.out.println(jwtResponse);
             return ResponseEntity.ok()
                     .body(jwtResponse);
         } catch (AuthenticationException e) {

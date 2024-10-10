@@ -24,12 +24,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включаем CORS
-                .csrf(csrf -> csrf.disable()) // Отключаем CSRF для REST API
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login").permitAll() // Разрешаем доступ к регистрации и логину
-                        .anyRequest().authenticated() // Остальные запросы требуют аутентификации
-                );
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .csrf(csrf -> csrf.disable());  // Отключаем CSRF, если не нужен
         return http.build();
     }
 

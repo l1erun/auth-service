@@ -20,8 +20,16 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
     org.springframework.cloud.gateway: DEBUG
+    ru.authservice: DEBUG
+    org.hibernate.SQL: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
 
 jwt:
   secret: hKfYbV1L1LwzFX2Yw8hEHyTj3E4xjV5SyJ6eR3Jg+oE=
   expiration: 3600000
-  refreshExpiration: 1209600000  # 14 ???? ??? refresh token
+  refreshExpiration: 1209600000
