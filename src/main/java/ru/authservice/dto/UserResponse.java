@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 public class UserResponse {
     private UUID id; // Уникальный идентификатор пользователя
     private String username; // Логин пользователя

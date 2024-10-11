@@ -29,6 +29,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     private WebClient webClient;
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
@@ -79,11 +82,13 @@ public class UserService {
 
     private void createProfileInProfileService(User user) {
         Map<String, Object> profileData = new HashMap<>();
+        String jwtToken = jwtService.generateToken(user);
         profileData.put("username", user.getUsername());
 //        profileData.put("email", user.getEmail());
 
         webClient.post()
-                .uri("http://localhost:8082/players/" + user.getId()) // URL микросервиса профиля
+                .uri("http://localhost:8080/players/" + user.getId()) // URL микросервиса профиля
+                .header("Authorization", "Bearer " + jwtToken) // Добавляем JWT токен в заголовок
                 .bodyValue(profileData)
                 .retrieve()
                 .bodyToMono(Void.class)
