@@ -10,6 +10,7 @@ import org.springframework.security.core.AuthenticationException;
 
 import org.springframework.web.bind.annotation.*;
 import ru.authservice.dto.JwtResponse;
+import ru.authservice.dto.LoginRequest;
 import ru.authservice.dto.UserRequest;
 import ru.authservice.dto.UserResponse;
 import ru.authservice.entity.CustomUserDetails;
@@ -51,7 +52,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody User loginRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -67,6 +68,30 @@ public class AuthController {
 
             UserResponse userResponse = new UserResponse(user);
             JwtResponse jwtResponse = new JwtResponse(jwt, refreshToken, userResponse);
+            return ResponseEntity.ok()
+                    .body(jwtResponse);
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body("Invalid username or password");
+        }
+    }
+
+    @PostMapping("/login/service")
+    public ResponseEntity<?> authenticateService(@RequestBody LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            User user = userDetails.getUser();
+            String jwt = jwtService.generateToken(user); // Генерация access token
+            String refreshToken = jwtService.generateRefreshToken(user); // Генерация refresh token
+
+//            UserResponse userResponse = new UserResponse(user);
+            JwtResponse jwtResponse = new JwtResponse(jwt, refreshToken, null);
             return ResponseEntity.ok()
                     .body(jwtResponse);
         } catch (AuthenticationException e) {
